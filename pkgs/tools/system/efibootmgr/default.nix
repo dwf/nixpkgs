@@ -23,7 +23,7 @@ stdenv.mkDerivation rec {
     })
   ];
   # We have no LTO here since commit 22284b07.
-  postPatch = if stdenv.isi686 then "sed '/^CFLAGS/s/-flto//' -i Make.defaults" else null;
+  postPatch = if stdenv.buildPlatform.isi686 then "sed '/^CFLAGS/s/-flto//' -i Make.defaults" else null;
 
   makeFlags = [ "EFIDIR=nixos" "PKG_CONFIG=${stdenv.cc.targetPrefix}pkg-config" ];
 
