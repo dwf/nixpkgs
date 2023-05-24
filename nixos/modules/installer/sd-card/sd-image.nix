@@ -150,6 +150,24 @@ in
         Whether to configure the sd image to expand it's partition on boot.
       '';
     };
+
+    mountPoint = mkOption {
+      type = types.path;
+      default = "/";
+      example = "/nix";
+      description = lib.mdDoc ''
+        Mount point for the created ext4 filesystem.
+      '';
+    };
+
+    storeRoot = mkOption {
+      type = types.path;
+      default = "/nix/store";
+      example = "/store";
+      description = lib.mdDoc ''
+        Desired path to the nix store on the created ext4 filesystem.
+      '';
+    };
   };
 
   config = {
@@ -162,7 +180,7 @@ in
         # as an opaque blob instead of a discrete FAT32 filesystem.
         options = [ "nofail" "noauto" ];
       };
-      "/" = {
+      "${config.sdImage.mountPoint}" = {
         device = "/dev/disk/by-label/NIXOS_SD";
         fsType = "ext4";
       };
@@ -255,13 +273,19 @@ in
       '';
     }) {};
 
-    boot.postBootCommands = lib.mkIf config.sdImage.expandOnBoot ''
+    boot.postBootCommands = let
+      # Deal correctly with "/" and other mount points with or without trailing
+      # slashes, etc.
+      mountPointParts = filter (p: p != "") (splitString "/" config.sdImage.mountPoint);
+      canonicalized = "/${concatStringsSep "/" mountPointParts}";
+      pathRegistration = "${canonicalized}/nix-path-registration";
+    in lib.mkIf config.sdImage.expandOnBoot ''
       # On the first boot do some maintenance tasks
-      if [ -f /nix-path-registration ]; then
+      if [ -f ${pathRegistration} ]; then
         set -euo pipefail
         set -x
         # Figure out device names for the boot device and root filesystem.
-        rootPart=$(${pkgs.util-linux}/bin/findmnt -n -o SOURCE /)
+        rootPart=$(${pkgs.util-linux}/bin/findmnt -n -o SOURCE ${canonicalized})
         bootDevice=$(lsblk -npo PKNAME $rootPart)
         partNum=$(lsblk -npo MAJ:MIN $rootPart | ${pkgs.gawk}/bin/awk -F: '{print $2}')
 
@@ -271,14 +295,14 @@ in
         ${pkgs.e2fsprogs}/bin/resize2fs $rootPart
 
         # Register the contents of the initial Nix store
-        ${config.nix.package.out}/bin/nix-store --load-db < /nix-path-registration
+        ${config.nix.package.out}/bin/nix-store --load-db < ${pathRegistration}
 
         # nixos-rebuild also requires a "system" profile and an /etc/NIXOS tag.
         touch /etc/NIXOS
         ${config.nix.package.out}/bin/nix-env -p /nix/var/nix/profiles/system --set /run/current-system
 
         # Prevents this from running on later boots.
-        rm -f /nix-path-registration
+        rm -f ${pathRegistration}
       fi
     '';
   };

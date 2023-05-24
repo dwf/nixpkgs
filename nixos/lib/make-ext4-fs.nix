@@ -12,6 +12,9 @@
 # Shell commands to populate the ./files directory.
 # All files in that directory are copied to the root of the FS.
 , populateImageCommands ? ""
+# Path of the nix store within the created filesystem. Useful for creating
+# a filesystem image to be mounted at e.g. /nix rather than /
+, storeRoot ? "/nix/store"
 , volumeLabel
 , uuid ? "44444444-4444-4444-8888-888888888888"
 , e2fsprogs
@@ -40,9 +43,9 @@ pkgs.stdenv.mkDerivation {
       echo "Preparing store paths for image..."
 
       # Create nix/store before copying path
-      mkdir -p ./rootImage/nix/store
+      mkdir -p ./rootImage${storeRoot}
 
-      xargs -I % cp -a --reflink=auto % -t ./rootImage/nix/store/ < ${sdClosureInfo}/store-paths
+      xargs -I % cp -a --reflink=auto % -t ./rootImage${storeRoot}/ < ${sdClosureInfo}/store-paths
       (
         GLOBIGNORE=".:.."
         shopt -u dotglob
