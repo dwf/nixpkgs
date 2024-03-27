@@ -29,6 +29,7 @@
 , rocm-comgr
 , roctracer
 , python3Packages
+, substituteAll
 , buildDocs ? false # Needs internet because of rocm-docs-core
 , buildTests ? false
 }:
@@ -116,6 +117,10 @@ in stdenv.mkDerivation (finalAttrs: {
       url = "https://github.com/ROCm/MIOpen/commit/3413d2daaeb44b7d6eadcc03033a5954a118491e.patch";
       hash = "sha256-ST4snUcTmmSI1Ogx815KEX9GdMnmubsavDzXCGJkiKs=";
     })
+    (substituteAll {
+      src = ./gtest.patch;
+      inherit gtest;
+    })
   ];
 
   outputs = [
@@ -155,6 +160,7 @@ in stdenv.mkDerivation (finalAttrs: {
     python3Packages.breathe
     python3Packages.myst-parser
   ] ++ lib.optionals buildTests [
+    gtest
     zlib
   ];
 
