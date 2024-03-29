@@ -253,7 +253,7 @@ in rec {
 
   miopen = callPackage ./miopen {
     inherit rocmUpdateScript rocm-cmake rocblas clang-ocl composable_kernel rocm-comgr clr rocm-docs-core half roctracer;
-    inherit (llvm) clang-tools-extra;
+    inherit (llvm) clang-tools-extra llvm;
     stdenv = llvm.rocmClangStdenv;
     rocmlir = rocmlir-rock;
     boost = boost179.override { enableStatic = true; };

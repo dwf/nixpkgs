@@ -1,0 +1,14 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 7866ad1a5..63320dce6 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -685,6 +685,9 @@ rocm_set_soversion(MIOpen ${MIOpen_SOVERSION})
+ 
+ clang_tidy_check(MIOpen)
+ 
++set(LLVM_DIR @llvm@/lib/cmake/llvm)
++target_link_libraries(MIOpen ${LLVM_LIBRARIES})
++
+ find_package(zstd)
+ if(zstd_FOUND)
+     target_link_libraries(MIOpen PRIVATE $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)

@@ -30,8 +30,9 @@
 , roctracer
 , python3Packages
 , substituteAll
+, llvm
 , buildDocs ? false # Needs internet because of rocm-docs-core
-, buildTests ? false
+, buildTests ? true
 }:
 
 let
@@ -121,6 +122,10 @@ in stdenv.mkDerivation (finalAttrs: {
       src = ./gtest.patch;
       inherit gtest;
     })
+    (substituteAll {
+      src = ./llvm.patch;
+      inherit llvm;
+    })
   ];
 
   outputs = [
@@ -151,6 +156,7 @@ in stdenv.mkDerivation (finalAttrs: {
     nlohmann_json
     frugally-deep
     roctracer
+    llvm
   ] ++ lib.optionals buildDocs [
     latex
     doxygen
@@ -186,7 +192,8 @@ in stdenv.mkDerivation (finalAttrs: {
     substituteInPlace CMakeLists.txt \
       --replace "unpack_db(\"\''${CMAKE_SOURCE_DIR}/src/kernels/\''${FILE_NAME}.kdb.bz2\")" "" \
       --replace "MIOPEN_HIP_COMPILER MATCHES \".*clang\\\\+\\\\+$\"" "true" \
-      --replace "set(MIOPEN_TIDY_ERRORS ALL)" "" # error: missing required key 'key'
+      --replace "set(MIOPEN_TIDY_ERRORS ALL)" "" \
+      --replace "/opt/rocm/llvm" "${llvm}"
 
     substituteInPlace test/gtest/CMakeLists.txt \
       --replace "include(googletest)" ""
