@@ -20,6 +20,7 @@
 , nsync
 , openssl
 , pybind11
+, runCommand
 , setuptools
 , substituteAll
 , symlinkJoin
@@ -239,17 +240,20 @@ let
       repo = "llvm-project";
 
       # Commit from bazel workspace
-      rev = "e630a451b457e4d8d071a2b4f102b342bbea2d02";
-      hash = "sha256-58ZvQ/31+jzLzmH8oseUaFVhWODUIyNFfYLTZMXJOvI=";
+      rev = "cca9f9b78fc657c280f7e4024a552af43a315bdb";
+      hash = "sha256-N5dM6x14D9AgUNt16W/I2EhMXiGuAfOc4MyY5P2yCmc=";
     };
 
     dontBuild = true;
     dontFixup = true;
 
-    patches = [
+    patches = let
+      generated-llvm-patch = runCommand "llvm-generated-patch" {} ''
+        tail -n +2 "${xla}/third_party/llvm/generated.patch" >$out
+      '';
+    in [
       # Patches in the bazel workspace
-
-      "${xla}/third_party/llvm/generated.patch"
+      generated-llvm-patch
       "${xla}/third_party/llvm/build.patch"
       "${xla}/third_party/llvm/mathextras.patch"
       "${xla}/third_party/llvm/toolchains.patch"
