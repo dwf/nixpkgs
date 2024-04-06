@@ -21,6 +21,7 @@
 , openssl
 , pybind11
 , setuptools
+, substituteAll
 , symlinkJoin
 , wheel
 , build
@@ -206,11 +207,10 @@ let
     };
 
     patches = [
-      # Resolves "could not convert ‘result’ from ‘SmallVector<[...],6>’ to
-      # ‘SmallVector<[...],4>’" compilation error. See https://github.com/google/jax/issues/19814#issuecomment-1945141259.
-      (fetchpatch {
-        url = "https://github.com/openxla/xla/commit/7a614cd346594fc7ea2fe75570c9c53a4a444f60.patch";
-        hash = "sha256-RtuQTH8wzNiJcOtISLhf+gMlH1gg8hekvxEB+4wX6BM=";
+      (substituteAll {
+        src = ./xla-rocm-includes.patch;
+        clang_include = "${rocmPackages_5.llvm.clang}/resource-root/include";
+        hip_include = "${rocmPackages_5.clr}/include/hip";
       })
     ];
 

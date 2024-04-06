@@ -1,0 +1,14 @@
+diff --git a/third_party/tsl/third_party/gpus/rocm_configure.bzl b/third_party/tsl/third_party/gpus/rocm_configure.bzl
+index 1a71c74d0..36652e5ea 100644
+--- a/third_party/tsl/third_party/gpus/rocm_configure.bzl
++++ b/third_party/tsl/third_party/gpus/rocm_configure.bzl
+@@ -209,6 +209,9 @@ def _rocm_include_path(repository_ctx, rocm_config, bash_bin):
+     # Add hcc headers
+     inc_dirs.append(rocm_toolkit_path + "/hcc/include")
+ 
++    inc_dirs.append("@clang_include@")
++    inc_dirs.append("@hip_include@")
++
+     return inc_dirs
+ 
+ def _enable_rocm(repository_ctx):
