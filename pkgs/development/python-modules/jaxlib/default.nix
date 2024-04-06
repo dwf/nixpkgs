@@ -49,6 +49,9 @@
 
   # MKL:
 , mklSupport ? true
+
+  # ROCm:
+, rocmPackages_5
 }@inputs:
 
 let
@@ -119,6 +122,22 @@ let
       effectiveStdenv.cc
       binutils.bintools # for ar, dwp, nm, objcopy, objdump, strip
     ];
+  };
+
+  rocm_packages_joined = symlinkJoin {
+    name = "rocm5-joined";
+    paths = (with rocmPackages_5; [
+      rocm-core clr roctracer miopen rocprim
+      hipcub rocsparse hipsparse rocsolver rocblas
+      hiprand rocrand rocthrust rocfft hipfft hipsolver
+      hipblas rocminfo rocm-thunk rocm-comgr
+      rocm-device-libs rocm-runtime rccl
+    ]) ++ (with rocmPackages_5.llvm; [
+      lld
+    ]);
+    postBuild = ''
+      ln -s $out $out/llvm
+    '';
   };
 
   # Copy-paste from TF derivation.
