@@ -240,8 +240,13 @@ let
       repo = "llvm-project";
 
       # Commit from bazel workspace
-      rev = "cca9f9b78fc657c280f7e4024a552af43a315bdb";
-      hash = "sha256-N5dM6x14D9AgUNt16W/I2EhMXiGuAfOc4MyY5P2yCmc=";
+      # rev = "cca9f9b78fc657c280f7e4024a552af43a315bdb";
+      # hash = "sha256-N5dM6x14D9AgUNt16W/I2EhMXiGuAfOc4MyY5P2yCmc=";
+
+      # Commit that fixes an error related to inferFromExprList having grown a
+      # second argument in its signature.
+      rev = "fe8a62c46365f5ef0c15df2265bbf0026d0a4047";
+      hash = "sha256-Xj/2j8NlHbWlI2id5JBQy7ODCV8rQ29ZJuiLAm0mjDs=";
     };
 
     dontBuild = true;
