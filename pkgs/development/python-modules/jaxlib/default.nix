@@ -119,7 +119,7 @@ let
   };
 
   backend_cc_joined = symlinkJoin {
-    name = "cuda-cc-joined";
+    name = "backend-cc-joined";
     paths = [
       effectiveStdenv.cc
       binutils.bintools # for ar, dwp, nm, objcopy, objdump, strip
@@ -291,8 +291,9 @@ let
 
     removeRulesCC = false;
 
-    GCC_HOST_COMPILER_PREFIX = lib.optionalString cudaSupport "${backend_cc_joined}/bin";
-    GCC_HOST_COMPILER_PATH = lib.optionalString cudaSupport "${backend_cc_joined}/bin/gcc";
+    # Need backend_cc_joined for `ar`, etc.
+    GCC_HOST_COMPILER_PREFIX = lib.optionalString (cudaSupport || rocmSupport) "${backend_cc_joined}/bin";
+    GCC_HOST_COMPILER_PATH = lib.optionalString (cudaSupport || rocmSupport) "${backend_cc_joined}/bin/gcc";
 
     # The version is automatically set to ".dev" if this variable is not set.
     # https://github.com/google/jax/commit/e01f2617b85c5bdffc5ffb60b3d8d8ca9519a1f3
