@@ -246,6 +246,16 @@ let
     dontBuild = true;
     dontFixup = true;
 
+    patches = [
+      # Patches in the bazel workspace
+
+      "${xla}/third_party/llvm/generated.patch"
+      "${xla}/third_party/llvm/build.patch"
+      "${xla}/third_party/llvm/mathextras.patch"
+      "${xla}/third_party/llvm/toolchains.patch"
+      "${xla}/third_party/llvm/zstd.patch"
+    ];
+
     postPatch = "patchShebangs .";
 
     installPhase = "cp -r . $out";
