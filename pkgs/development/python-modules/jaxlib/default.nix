@@ -51,6 +51,7 @@
 , mklSupport ? true
 
   # ROCm:
+, rocmSupport ? config.rocmSupport
 , rocmPackages_5
 }@inputs:
 
@@ -344,6 +345,10 @@ let
         build --config=avx_posix
       '' + lib.optionalString mklSupport ''
         build --config=mkl_open_source_only
+      '' + lib.optionalString rocmSupport ''
+        build --config=rocm
+        build --action_env ROCM_PATH=${rocm_packages_joined}
+        build:rocm --action_env TF_ROCM_AMDGPU_TARGETS="${lib.concatStringsSep "," rocmPackages_5.clr.gpuTargets}"
       '' +
       ''
         CFG
@@ -437,6 +442,12 @@ buildPythonPackage {
 
     find $out -type f \( -name '*.so' -or -name '*.so.*' \) | while read lib; do
       patchelf --add-rpath "${lib.makeLibraryPath [cuda_libs_joined cudnn nccl]}" "$lib"
+    done
+  '' + lib.optionalString rocmSupport ''
+    mkdir -p $out/bin
+    ln -s ${rocm_packages_joined}/bin/ld.lld $out/bin/ld.lld
+    find $out -type f \( -name '*.so' -or -name '*.so.*' \) | while read lib; do
+      patchelf --add-rpath "${rocm_packages_joined}" "$lib"
     done
   '';
 
