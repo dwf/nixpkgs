@@ -230,6 +230,27 @@ let
     '';
   };
 
+  llvm = effectiveStdenv.mkDerivation {
+    pname = "llvm-src";
+    version = "unstable";
+
+    src = fetchFromGitHub {
+      owner = "llvm";
+      repo = "llvm-project";
+
+      # Commit from bazel workspace
+      rev = "e630a451b457e4d8d071a2b4f102b342bbea2d02";
+      hash = "sha256-58ZvQ/31+jzLzmH8oseUaFVhWODUIyNFfYLTZMXJOvI=";
+    };
+
+    dontBuild = true;
+    dontFixup = true;
+
+    postPatch = "patchShebangs .";
+
+    installPhase = "cp -r . $out";
+  };
+
   bazel-build = buildBazelPackage rec {
     name = "bazel-build-${pname}-${version}";
 
@@ -363,6 +384,7 @@ let
       # See https://bazel.build/external/advanced#overriding-repositories for
       # information on --override_repository flag.
       "--override_repository=xla=${xla}"
+      "--override_repository=llvm=${llvm}"
     ] ++ lib.optionals effectiveStdenv.cc.isClang [
       # bazel depends on the compiler frontend automatically selecting these flags based on file
       # extension but our clang doesn't.
