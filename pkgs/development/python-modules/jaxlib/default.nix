@@ -199,11 +199,12 @@ let
     version = "unstable";
 
     src = fetchFromGitHub {
-      owner = "openxla";
+      owner = "ROCm";
       repo = "xla";
       # Update this according to https://github.com/google/jax/blob/jaxlib-v${version}/third_party/xla/workspace.bzl.
-      rev = "12eee889e1f2ad41e27d7b0e970cb92d282d3ec5";
-      hash = "sha256-68kjjgwYjRlcT0TVJo9BN6s+WTkdu5UMJqQcfHpBT90=";
+      # ... or don't, I'm a comment, not a cop
+      rev = "rocm-jaxlib-v0.4.24";
+      hash = "sha256-L2Pv/MhE8xdudF/PXbLqNHd7voxhifDeEzdhjXpbB7A=";
     };
 
     patches = [
@@ -390,6 +391,8 @@ let
 
       sha256 = (if cudaSupport then {
         x86_64-linux = "sha256-IEKoHjCOtKZKvU/DUUjbvXldORFJuyO1R3F6CZZDXxM=";
+      } else if rocmSupport then {
+        x86_64-linux = "sha256-3VARx1xf9AA7MK4pEDSWJA70uunakxPbLBZbcf4kJtw=";
       } else {
         x86_64-linux = "sha256-IE4+Tk4llo85u3NjakvY04tPw4R1bidyecPpQ4gknR8=";
         aarch64-linux = "sha256-NehnpA4m+Fynvh0S6WKy/v9ab81487NE9ahvbS70wjY=";
