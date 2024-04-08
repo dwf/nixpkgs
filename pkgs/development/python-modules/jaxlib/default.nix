@@ -253,21 +253,58 @@ let
     dontFixup = true;
 
     patches = let
-      generated-llvm-patch = runCommand "llvm-generated-patch" {} ''
-        tail -n +2 "${xla}/third_party/llvm/generated.patch" >$out
-      '';
+      #generated-llvm-patch = runCommand "llvm-generated-patch" {} ''
+      #  tail -n +2 "${xla}/third_party/llvm/generated.patch" >$out
+      #'';
     in [
       # Patches in the bazel workspace
-      generated-llvm-patch
+      # generated-llvm-patch
       "${xla}/third_party/llvm/build.patch"
       "${xla}/third_party/llvm/mathextras.patch"
       "${xla}/third_party/llvm/toolchains.patch"
       "${xla}/third_party/llvm/zstd.patch"
+
+      # An attempt to patch in the inferFromExprList thing in isolation
+      # (fetchpatch {
+      #   url = "https://github.com/llvm/llvm-project/commit/fe8a62c46365f5ef0c15df2265bbf0026d0a4047.patch";
+      #   sha256 = "sha256-KgDOP0ezbkr5JRetpV1q0zTFpMrS9KkZsLdI95fMejI=";
+      # })
+      #./llvm-hardcode-arch.patch
     ];
 
+    nativeBuildInputs = [ python ];
     postPatch = "patchShebangs .";
 
     installPhase = "cp -r . $out";
+  };
+
+  # Overriding this repo fixes a few errors related to the patch not being applied.
+
+  stablehlo = effectiveStdenv.mkDerivation {
+    pname = "stablehlo-src";
+    version = "unstable";
+
+    src = fetchFromGitHub {
+      owner = "openxla";
+      repo = "stablehlo";
+      rev = "e708c82502982697540886738a307f72f9e9a7ff";
+      hash = "sha256-ZGsa+m/o6l663to8v9B6bXped0YI4PPms5QQRgLtg7s=";
+    };
+    patches = [
+      # Overriding in this way seems to actually apply this patch, which
+      # the bazel workspace file seems to indicate should be getting applied
+      # by bazel, but isn't.
+      "${xla}/third_party/stablehlo/temporary.patch"
+    ];
+    dontBuild = true;
+
+    nativeBuildInputs = [ python ];
+    postPatch = ''
+      patchShebangs .
+    '';
+    installPhase = ''
+      cp -r . $out
+    '';
   };
 
   bazel-build = buildBazelPackage rec {
@@ -403,6 +440,7 @@ let
       # See https://bazel.build/external/advanced#overriding-repositories for
       # information on --override_repository flag.
       "--override_repository=xla=${xla}"
+      "--override_repository=stablehlo=${stablehlo}"
       "--override_repository=llvm=${llvm}"
     ] ++ lib.optionals effectiveStdenv.cc.isClang [
       # bazel depends on the compiler frontend automatically selecting these flags based on file
