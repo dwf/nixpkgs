@@ -61,7 +61,7 @@ let
   inherit (cudaPackagesGoogle) cudaFlags cudaVersion cudnn nccl;
 
   pname = "jaxlib";
-  version = "0.4.24";
+  version = "0.4.25";
 
   # It's necessary to consistently use backendStdenv when building with CUDA
   # support, otherwise we get libstdc++ errors downstream
@@ -204,8 +204,8 @@ let
       repo = "xla";
       # Update this according to https://github.com/google/jax/blob/jaxlib-v${version}/third_party/xla/workspace.bzl.
       # ... or don't, I'm a comment, not a cop
-      rev = "rocm-jaxlib-v0.4.24";
-      hash = "sha256-L2Pv/MhE8xdudF/PXbLqNHd7voxhifDeEzdhjXpbB7A=";
+      rev = "rocm-jaxlib-v0.4.25";
+      hash = "sha256-uxefaeN5zNL7oB8HwpwmzGeIDCBa6sqD3KjmZx46j9Q=";
     };
 
     patches = [
@@ -314,11 +314,11 @@ let
     bazel = bazel_6;
 
     src = fetchFromGitHub {
-      owner = "google";
+      owner = "ROCm";
       repo = "jax";
       # google/jax contains tags for jax and jaxlib. Only use jaxlib tags!
       rev = "refs/tags/${pname}-v${version}";
-      hash = "sha256-hmx7eo3pephc6BQfoJ3U0QwWBWmhkAc+7S4QmW32qQs=";
+      hash = "sha256-GLdxIMCVL+viZkNux3CjwJKT0BYkhNuB4x23iOvXmTk=";
     };
 
     nativeBuildInputs = [
@@ -471,7 +471,7 @@ let
       sha256 = (if cudaSupport then {
         x86_64-linux = "sha256-IEKoHjCOtKZKvU/DUUjbvXldORFJuyO1R3F6CZZDXxM=";
       } else if rocmSupport then {
-        x86_64-linux = "sha256-3VARx1xf9AA7MK4pEDSWJA70uunakxPbLBZbcf4kJtw=";
+        x86_64-linux = "sha256-HO6WfoIoPDhV4jwzGLYOxbDagWUV0OUuaIDfGLebX/E=";
       } else {
         x86_64-linux = "sha256-IE4+Tk4llo85u3NjakvY04tPw4R1bidyecPpQ4gknR8=";
         aarch64-linux = "sha256-NehnpA4m+Fynvh0S6WKy/v9ab81487NE9ahvbS70wjY=";
@@ -515,7 +515,9 @@ buildPythonPackage {
 
   src =
     let cp = "cp${builtins.replaceStrings ["."] [""] python.pythonVersion}";
-    in "${bazel-build}/jaxlib-${version}-${cp}-${cp}-${platformTag}.whl";
+    # For some reason the output filename still has 0.4.24, not the actual
+    # version of 0.4.25
+    in "${bazel-build}/jaxlib-0.4.24-${cp}-${cp}-${platformTag}.whl";
 
   # Note that jaxlib looks for "ptxas" in $PATH. See https://github.com/NixOS/nixpkgs/pull/164176#discussion_r828801621
   # for more info.
