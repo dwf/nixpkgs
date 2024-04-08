@@ -1,0 +1,13 @@
+diff --git a/xla/service/gpu/nccl_api.cc b/xla/service/gpu/nccl_api.cc
+index b0d284140..f3fd75e92 100644
+--- a/xla/service/gpu/nccl_api.cc
++++ b/xla/service/gpu/nccl_api.cc
+@@ -374,7 +374,7 @@ DefaultNcclApi::CommInitRanks(int32_t nranks, const NcclCliqueId& clique_id,
+ #if !defined(TENSORFLOW_USE_ROCM) || \
+     (defined(TENSORFLOW_USE_ROCM) && TF_ROCM_VERSION > 50700)
+   ncclConfig_t comm_config = NCCL_CONFIG_INITIALIZER;
+-  comm_config.splitShare = config.split_share;
++  //comm_config.splitShare = config.split_share;
+   if (config.max_nchannels > 0) {
+     comm_config.maxCTAs = config.max_nchannels;
+     VLOG(1) << "Maximum number of channels for hash(id)="

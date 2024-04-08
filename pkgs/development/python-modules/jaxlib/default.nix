@@ -214,6 +214,7 @@ let
         clang_include = "${rocmPackages_5.llvm.clang}/resource-root/include";
         hip_include = "${rocmPackages_5.clr}/include/hip";
       })
+      ./xla-disable-splitshare.patch
     ];
 
     dontBuild = true;
